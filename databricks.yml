@@ -1,0 +1,46 @@
+# This is a Databricks pipelines definition for migrate_sdp.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: migrate_sdp
+  uuid: 4d264e3d-7b3c-4f4a-a343-6436e2a79737
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+  - ./*.yml
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+variables:
+  catalog:
+    description: The catalog to use
+  schema:
+    description: The schema to use
+  notifications:
+    description: The email addresses to use for failure notifications
+
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed pipelines get prefixed with '[dev my_user_name]'
+    mode: development
+    default: true
+    workspace:
+      host: https://e2-dogfood.staging.cloud.databricks.com
+    variables:
+      catalog: main
+      schema: ${workspace.current_user.short_name}
+      notifications: []
+
+  prod:
+    mode: production
+    workspace:
+      host: https://e2-dogfood.staging.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/tanishq.maheshwari@databricks.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/tanishq.maheshwari@databricks.com/.bundle/${bundle.name}/${bundle.target}
+    permissions:
+      - user_name: tanishq.maheshwari@databricks.com
+        level: CAN_MANAGE
+    variables:
+      catalog: main
+      schema: default
+      notifications: [tanishq.maheshwari@databricks.com]

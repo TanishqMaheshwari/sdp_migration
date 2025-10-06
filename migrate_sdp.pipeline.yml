@@ -1,0 +1,11 @@
+resources:
+  pipelines:
+    migrate_sdp_pipeline:
+      name: migrate_sdp_pipeline
+      serverless: true
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      root_path: "."
+      libraries:
+        - glob:
+            include: transformations/**
